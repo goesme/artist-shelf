@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E0F11">
+<title>그림체 서랍</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%235FB49C'/></svg>">
+<style>
+:root{
+  --bg:#0E0F11; --raise:#16181B; --line:#272A30; --line2:#1D2025;
+  --text:#E9EBEE; --mut:#8B9099; --dim:#5E636C;
+  --accent:#5FB49C; --accent-ink:#06211B; --warn:#E0705B;
+  --mono:ui-monospace,SFMono-Regular,"Roboto Mono",Menlo,monospace;
+  --head-h:118px;
+}
+:root[data-theme="light"]{
+  --bg:#FAFAF8; --raise:#FFFFFF; --line:#E3E4E2; --line2:#EDEEEC;
+  --text:#16181B; --mut:#6B7078; --dim:#9AA0A6;
+  --accent:#2E7D68; --accent-ink:#FFFFFF;
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#FAFAF8; --raise:#FFFFFF; --line:#E3E4E2; --line2:#EDEEEC;
+    --text:#16181B; --mut:#6B7078; --dim:#9AA0A6;
+    --accent:#2E7D68; --accent-ink:#FFFFFF;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:"Pretendard Variable",Pretendard,-apple-system,"Noto Sans KR",system-ui,sans-serif;
+  font-size:15px;line-height:1.55;
+  padding-bottom:88px;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{border:none;background:none;cursor:pointer}
+a{color:var(--accent)}
+
+/* ── 헤더 ── */
+header{
+  position:sticky;top:0;z-index:30;background:var(--bg);
+  border-bottom:1px solid var(--line);
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+}
+.brandrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.brand{font-size:15px;font-weight:700;letter-spacing:-.02em}
+.brand i{
+  display:inline-block;width:9px;height:9px;border-radius:2px;
+  background:var(--accent);margin-right:7px;vertical-align:1px;
+}
+.count{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+.iconbtn{
+  width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--mut);
+  border:1px solid var(--line);
+}
+.iconbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.iconbtn.live{color:var(--accent);border-color:var(--accent)}
+
+.searchwrap{position:relative}
+.searchwrap svg.mag{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:17px;height:17px;stroke:var(--dim);fill:none;stroke-width:2;stroke-linecap:round;
+}
+#q{
+  width:100%;padding:12px 38px 12px 37px;border-radius:10px;
+  background:var(--raise);border:1px solid var(--line);outline:none;font-size:16px;
+}
+#q:focus{border-color:var(--accent)}
+#qclear{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  width:28px;height:28px;border-radius:7px;display:none;place-items:center;color:var(--dim);
+}
+#qclear.on{display:grid}
+#qclear svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+
+.tagbar{display:flex;gap:6px;overflow-x:auto;margin-top:9px;padding-bottom:1px;scrollbar-width:none}
+.tagbar::-webkit-scrollbar{display:none}
+.tagbar button{
+  padding:5px 11px;border-radius:14px;border:1px solid var(--line);
+  font-size:12px;color:var(--mut);white-space:nowrap;font-weight:600;
+}
+.tagbar button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+/* ── 그리드 ── */
+main{padding:14px 12px 24px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 10px}
+@media (min-width:560px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:860px){.grid{grid-template-columns:repeat(4,1fr);gap:20px 14px}}
+
+.cell{display:block;text-align:left;width:100%}
+.frame{
+  position:relative;width:100%;aspect-ratio:3/4;border-radius:8px;overflow:hidden;
+  background:var(--line2);border:1px solid var(--line);
+}
+.frame img{width:100%;height:100%;object-fit:cover;display:block}
+.cell:active .frame{border-color:var(--accent)}
+.frame .none{
+  position:absolute;inset:0;display:grid;place-items:center;text-align:center;
+  color:var(--dim);font-size:11.5px;line-height:1.5;padding:10px;
+}
+.frame .none svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;margin-bottom:5px}
+.frame .shots{
+  position:absolute;right:5px;bottom:5px;padding:2px 6px;border-radius:5px;
+  background:rgba(8,9,11,.72);color:#E9EBEE;font-family:var(--mono);font-size:10.5px;
+}
+.cell .nm{
+  margin-top:7px;font-size:13px;font-weight:600;letter-spacing:-.01em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.cell .sub{
+  font-size:11px;color:var(--mut);margin-top:1px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+mark{background:transparent;color:var(--accent);font-weight:700}
+
+.empty{text-align:center;padding:60px 24px;color:var(--dim)}
+.empty strong{display:block;color:var(--mut);font-size:15px;margin-bottom:6px}
+.empty span{font-size:13px;line-height:1.65}
+
+/* ── FAB ── */
+#fab{
+  position:fixed;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:40;
+  width:54px;height:54px;border-radius:17px;background:var(--accent);color:var(--accent-ink);
+  display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,0,0,.3);
+}
+#fab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+
+/* ── 시트 ── */
+.sheetbg{position:fixed;inset:0;z-index:60;background:rgba(5,6,8,.74);display:none;align-items:flex-end}
+.sheetbg.on{display:flex}
+.sheet{
+  width:100%;max-height:90vh;overflow-y:auto;background:var(--bg);
+  border-radius:16px 16px 0 0;border-top:1px solid var(--line);
+  padding:14px 16px calc(28px + env(safe-area-inset-bottom));
+}
+@media (min-width:700px){
+  .sheetbg{align-items:center;justify-content:center}
+  .sheet{max-width:620px;border-radius:14px;border:1px solid var(--line)}
+}
+.grab{width:34px;height:4px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+.sheet h3{margin:0 0 12px;font-size:17px;font-weight:700;letter-spacing:-.02em}
+
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--mut);margin-bottom:5px;font-weight:600}
+.field input,.field textarea{
+  width:100%;padding:10px 11px;border-radius:9px;background:var(--raise);
+  border:1px solid var(--line);outline:none;font-size:16px;
+}
+.field input:focus,.field textarea:focus{border-color:var(--accent)}
+.field textarea{resize:vertical;min-height:62px;line-height:1.55}
+.field .note{font-size:11.5px;color:var(--dim);margin-top:5px;line-height:1.5}
+
+.btn{padding:12px 14px;border-radius:10px;background:var(--raise);border:1px solid var(--line);font-weight:600;font-size:14px;text-align:center}
+.btn:active{filter:brightness(1.3)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{border-color:var(--warn);color:var(--warn);background:none}
+.btn.wide{display:block;width:100%}
+.btn:disabled{opacity:.45}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+
+/* 상세 */
+.shotstrip{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none}
+.shotstrip::-webkit-scrollbar{display:none}
+.shotstrip .s{position:relative;flex:0 0 auto;width:132px}
+.shotstrip img{width:132px;aspect-ratio:3/4;object-fit:cover;border-radius:9px;border:1px solid var(--line);display:block}
+.shotstrip .del{
+  position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:7px;
+  background:rgba(8,9,11,.78);display:grid;place-items:center;color:#fff;
+}
+.shotstrip .del svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+.metaline{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-bottom:12px}
+.tagchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tagchips span{padding:4px 9px;border-radius:12px;border:1px solid var(--line);font-size:11.5px;color:var(--mut)}
+.memo{font-size:13.5px;color:var(--mut);line-height:1.6;margin-bottom:14px;white-space:pre-wrap}
+
+/* 라이트박스 */
+#lb{position:fixed;inset:0;z-index:80;background:#07080A;display:none;place-items:center;padding:8px}
+#lb.on{display:grid}
+#lb img{max-width:100%;max-height:100%;object-fit:contain;border-radius:5px}
+
+/* 토스트 */
+#toast{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(92px + env(safe-area-inset-bottom));z-index:90;
+  background:var(--raise);border:1px solid var(--line);color:var(--text);
+  padding:9px 16px;border-radius:20px;font-size:13px;font-weight:600;
+  opacity:0;pointer-events:none;transition:opacity .2s;max-width:88vw;text-align:center;
+}
+#toast.on{opacity:1}
+
+/* 진행바 */
+#bar{position:fixed;left:0;top:0;height:2px;background:var(--accent);width:0;z-index:95;transition:width .25s;opacity:0}
+#bar.on{opacity:1}
+
+.statusnote{
+  font-size:12px;color:var(--dim);background:var(--raise);
+  border:1px solid var(--line);border-radius:9px;padding:10px 12px;margin-bottom:12px;line-height:1.6;
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+
+<header>
+  <div class="brandrow">
+    <span class="brand"><i></i>그림체 서랍</span>
+    <span class="count" id="count"></span>
+    <button class="iconbtn" id="btn-theme" title="테마" aria-label="테마 바꾸기">
+      <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <button class="iconbtn" id="btn-cfg" title="설정" aria-label="설정">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+    </button>
+  </div>
+
+  <div class="searchwrap">
+    <svg class="mag" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="작가, 별칭, 태그, 메모 검색" autocomplete="off" enterkeyhint="search">
+    <button id="qclear" aria-label="지우기"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  </div>
+
+  <div class="tagbar" id="tagbar"></div>
+</header>
+
+<main><div id="list"></div></main>
+
+<button id="fab" aria-label="작가 추가"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+
+<div class="sheetbg" id="sheetbg"><div class="sheet" id="sheet"></div></div>
+<div id="lb"><img id="lbimg" alt=""></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+
+/* ─────────── 유틸 ─────────── */
+const $ = s => document.querySelector(s);
+const el = (t,c,x) => { const e=document.createElement(t); if(c)e.className=c; if(x!=null)e.textContent=x; return e; };
+const esc = s => String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+
+function store(k,v){
+  try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }
+  catch(e){ return null; }
+}
+function del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+let toastT=null;
+function toast(m){
+  const t=$("#toast"); t.textContent=m; t.classList.add("on");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"),2200);
+}
+function bar(p){
+  const b=$("#bar");
+  if(p==null){ b.classList.remove("on"); b.style.width="0"; return; }
+  b.classList.add("on"); b.style.width=Math.max(4,Math.min(100,p))+"%";
+}
+
+/* ─────────── 설정 ─────────── */
+const CFG = {
+  owner: store("gs_owner") || "",
+  repo:  store("gs_repo")  || "",
+  branch:store("gs_branch")|| "main",
+  token: store("gs_token") || "",
+};
+
+// GitHub Pages 주소에서 저장소를 자동으로 알아낸다
+(function detect(){
+  if(CFG.owner && CFG.repo) return;
+  const h = location.hostname, p = location.pathname;
+  const m = h.match(/^([a-z0-9-]+)\.github\.io$/i);
+  if(!m) return;
+  CFG.owner = m[1];
+  const seg = p.split("/").filter(Boolean);
+  CFG.repo = seg.length ? seg[0] : (m[1] + ".github.io");
+})();
+
+const canWrite = () => !!(CFG.owner && CFG.repo && CFG.token);
+
+/* ─────────── 데이터 ─────────── */
+// 저장소에 목록 파일이 아직 없을 때 쓰는 기본 명단.
+// 처음 뭔가를 추가·수정하는 순간 data/artists.json 으로 저장된다.
+const SEED = ["for-u","mikan03 26","hwansang","momoko (momopoco)","ningen mame",
+  "omutatsu","rurudo","necomi","chamooi","cura","shnva","shigure ui","zain",
+  "ke-ta","onineko","wanke","muchi maro","mignon","quasarcake","supernew",
+  "channel (caststation)","healthyman","torino aqua"];
+
+function seedArtists(){
+  return SEED.map(n=>({
+    id: n.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""),
+    name:n, alias:"", tags:[], memo:"", images:[], added:null
+  }));
+}
+
+let DATA = { version:1, artists:[] };
+let SHA = null;              // data/artists.json 의 현재 sha
+let FILTER = "";             // 선택된 태그
+const BLOBS = new Map();     // 방금 올린 이미지의 로컬 미리보기
+
+async function loadData(){
+  // 토큰이 있으면 API로 (방금 쓴 내용이 바로 보임), 없으면 정적 파일로
+  if(canWrite()){
+    try{
+      const r = await ghFetch("contents/data/artists.json?ref="+encodeURIComponent(CFG.branch));
+      if(r.ok){
+        const j = await r.json();
+        SHA = j.sha;
+        DATA = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,"")))));
+        return;
+      }
+    }catch(e){ /* 아래로 폴백 */ }
+  }
+  let got = false;
+  try{
+    const r = await fetch("data/artists.json?t="+Date.now(), {cache:"no-store"});
+    if(r.ok){ DATA = await r.json(); got = true; }
+  }catch(e){ /* 파일이 아직 없을 수 있다 */ }
+  if(!DATA || !Array.isArray(DATA.artists)) DATA = {version:1, artists:[]};
+  // 목록 파일이 아직 없으면 기본 명단으로 시작한다
+  if(!got && !DATA.artists.length){ DATA.artists = seedArtists(); SHA = null; }
+}
+
+/* ─────────── GitHub API ─────────── */
+function ghFetch(path, opts={}){
+  const headers = Object.assign(
+    {"Accept":"application/vnd.github+json"},
+    CFG.token ? {"Authorization":"Bearer "+CFG.token} : {},
+    opts.headers||{}
+  );
+  return fetch(`https://api.github.com/repos/${CFG.owner}/${CFG.repo}/${path}`,
+               Object.assign({},opts,{headers}));
+}
+
+function b64text(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function b64blob(blob){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>res(String(fr.result).split(",")[1]);
+    fr.onerror=rej;
+    fr.readAsDataURL(blob);
+  });
+}
+
+async function putFile(path, contentB64, message, sha){
+  const body = {message, content:contentB64, branch:CFG.branch};
+  if(sha) body.sha = sha;
+  const r = await ghFetch("contents/"+path, {
+    method:"PUT",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(body)
+  });
+  if(!r.ok){
+    let msg = r.status+"";
+    try{ const j=await r.json(); msg = j.message || msg; }catch(e){}
+    if(r.status===401) msg = "토큰이 거부되었습니다. 설정에서 다시 넣어주세요.";
+    if(r.status===404) msg = "저장소를 찾을 수 없습니다. 설정의 소유자/저장소 이름을 확인하세요.";
+    if(r.status===403) msg = "권한이 없습니다. 토큰에 Contents 쓰기 권한이 있는지 확인하세요.";
+    throw new Error(msg);
+  }
+  return r.json();
+}
+
+async function saveData(message){
+  if(!canWrite()) throw new Error("설정에서 깃허브 토큰을 먼저 넣어주세요.");
+  const json = JSON.stringify(DATA, null, 1);
+  try{
+    const res = await putFile("data/artists.json", b64text(json), message, SHA);
+    SHA = res.content.sha;
+  }catch(e){
+    // 다른 기기에서 먼저 저장했으면 sha가 어긋난다. 최신 sha로 한 번 재시도.
+    if(/sha|conflict|409/i.test(e.message)){
+      const r = await ghFetch("contents/data/artists.json?ref="+encodeURIComponent(CFG.branch));
+      if(r.ok){
+        const j = await r.json();
+        SHA = j.sha;
+        const res = await putFile("data/artists.json", b64text(json), message, SHA);
+        SHA = res.content.sha;
+        return;
+      }
+    }
+    throw e;
+  }
+}
+
+/* ─────────── 이미지 ─────────── */
+async function shrink(file, max=1100, quality=0.82){
+  const bmp = await createImageBitmap(file);
+  const scale = Math.min(1, max/Math.max(bmp.width,bmp.height));
+  const w = Math.round(bmp.width*scale), h = Math.round(bmp.height*scale);
+  const c = document.createElement("canvas");
+  c.width=w; c.height=h;
+  c.getContext("2d").drawImage(bmp,0,0,w,h);
+  bmp.close?.();
+  return new Promise(r=>c.toBlob(r,"image/jpeg",quality));
+}
+
+function imgSrc(path){
+  if(BLOBS.has(path)) return BLOBS.get(path);
+  return path + "?v=" + (DATA._v||1);
+}
+
+/* ─────────── 검색 ─────────── */
+function norm(s){ return String(s||"").toLowerCase().replace(/[\s_()-]+/g,""); }
+
+function matches(a, qn){
+  if(!qn) return true;
+  const hay = norm([a.name, a.alias, (a.tags||[]).join(" "), a.memo].join(" "));
+  return hay.includes(qn);
+}
+
+function hi(text, qn){
+  const frag = document.createDocumentFragment();
+  if(!qn){ frag.append(document.createTextNode(text)); return frag; }
+  // 정규화된 문자열에서 찾되, 원본 인덱스로 되돌려 표시
+  const map=[]; let n="";
+  for(let i=0;i<text.length;i++){
+    const c=norm(text[i]);
+    if(c){ n+=c; for(let k=0;k<c.length;k++) map.push(i); }
+  }
+  const at = n.indexOf(qn);
+  if(at<0){ frag.append(document.createTextNode(text)); return frag; }
+  const s = map[at], e = map[Math.min(at+qn.length-1, map.length-1)]+1;
+  frag.append(document.createTextNode(text.slice(0,s)));
+  const m = el("mark",null,text.slice(s,e));
+  frag.append(m, document.createTextNode(text.slice(e)));
+  return frag;
+}
+
+/* ─────────── 렌더 ─────────── */
+function allTags(){
+  const c = new Map();
+  DATA.artists.forEach(a => (a.tags||[]).forEach(t => c.set(t,(c.get(t)||0)+1)));
+  return [...c.entries()].sort((x,y)=>y[1]-x[1]).map(x=>x[0]);
+}
+
+function renderTagbar(){
+  const bar = $("#tagbar");
+  bar.innerHTML="";
+  const tags = allTags();
+  if(!tags.length){ bar.style.display="none"; return; }
+  bar.style.display="flex";
+  const mk=(label,val)=>{
+    const b=el("button",null,label);
+    b.setAttribute("aria-pressed", FILTER===val);
+    b.onclick=()=>{ FILTER = (FILTER===val?"":val); renderTagbar(); render(); };
+    return b;
+  };
+  tags.forEach(t=>bar.append(mk(t,t)));
+}
+
+function render(){
+  const qn = norm($("#q").value);
+  const box = $("#list");
+  box.innerHTML="";
+
+  let list = DATA.artists.filter(a=>matches(a,qn));
+  if(FILTER) list = list.filter(a=>(a.tags||[]).includes(FILTER));
+  // 보려고 만든 목록이니 그림 있는 쪽을 먼저, 그 안에서는 이름순
+  list.sort((a,b)=>{
+    const ia=(a.images||[]).length?0:1, ib=(b.images||[]).length?0:1;
+    return ia-ib || a.name.localeCompare(b.name,"en");
+  });
+
+  $("#count").textContent = qn||FILTER ? `${list.length} / ${DATA.artists.length}` : `${DATA.artists.length}명`;
+
+  if(!list.length){
+    const e=el("div","empty");
+    if(DATA.artists.length){
+      e.append(el("strong",null,"찾는 작가가 없어요"));
+      e.append(el("span",null,"다른 말로 검색하거나, 오른쪽 아래 + 로 새로 추가하세요."));
+    }else{
+      e.append(el("strong",null,"아직 비어 있어요"));
+      e.append(el("span",null,"오른쪽 아래 + 를 눌러 첫 작가를 추가해 보세요."));
+    }
+    box.append(e);
+    return;
+  }
+
+  const grid = el("div","grid");
+  list.forEach(a=>{
+    const cell = el("button","cell");
+    const fr = el("div","frame");
+    const shots = a.images||[];
+    if(shots.length){
+      const im = el("img");
+      im.src = imgSrc(shots[0]); im.alt=""; im.loading="lazy";
+      im.onerror = ()=>{ im.remove(); fr.append(noneBox("이미지를 불러오지 못했어요")); };
+      fr.append(im);
+      if(shots.length>1) fr.append(el("span","shots",String(shots.length)));
+    }else{
+      fr.append(noneBox("이미지 없음\n탭해서 추가"));
+    }
+    cell.append(fr);
+
+    const nm = el("div","nm");
+    nm.append(hi(a.name, qn));
+    cell.append(nm);
+
+    const subtxt = a.alias || (a.tags||[]).join(" · ");
+    if(subtxt){
+      const sb = el("div","sub");
+      sb.append(hi(subtxt, qn));
+      cell.append(sb);
+    }
+
+    cell.onclick = ()=>openDetail(a.id);
+    grid.append(cell);
+  });
+  box.append(grid);
+}
+
+function noneBox(text){
+  const d = el("div","none");
+  d.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+  const t = el("div"); t.style.whiteSpace="pre-line"; t.textContent=text;
+  d.append(t);
+  return d;
+}
+
+/* ─────────── 시트 ─────────── */
+function openSheet(){ $("#sheetbg").classList.add("on"); }
+function closeSheet(){ $("#sheetbg").classList.remove("on"); }
+$("#sheetbg").onclick = e => { if(e.target.id==="sheetbg") closeSheet(); };
+
+function openLb(src){ $("#lbimg").src=src; $("#lb").classList.add("on"); }
+$("#lb").onclick = ()=>$("#lb").classList.remove("on");
+
+/* 상세 */
+function openDetail(id){
+  const a = DATA.artists.find(x=>x.id===id);
+  if(!a) return;
+  const s = $("#sheet");
+  s.innerHTML="";
+  s.append(el("div","grab"));
+  s.append(el("h3",null,a.name));
+
+  const meta = el("div","metaline");
+  meta.textContent = `${(a.images||[]).length}장` + (a.added?` · ${a.added.slice(0,10)}`:"");
+  s.append(meta);
+
+  if((a.images||[]).length){
+    const strip = el("div","shotstrip");
+    a.images.forEach((p,i)=>{
+      const wrap = el("div","s");
+      const im = el("img"); im.src=imgSrc(p); im.alt=""; im.loading="lazy";
+      im.onclick = ()=>openLb(imgSrc(p));
+      wrap.append(im);
+      if(canWrite()){
+        const d = el("button","del");
+        d.innerHTML='<svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg>';
+        d.onclick = async ev=>{
+          ev.stopPropagation();
+          if(!confirm("이 이미지를 목록에서 뺄까요?")) return;
+          a.images.splice(i,1);
+          try{ await saveData("이미지 삭제: "+a.name); openDetail(id); render(); toast("뺐습니다"); }
+          catch(err){ toast(err.message); }
+        };
+        wrap.append(d);
+      }
+      strip.append(wrap);
+    });
+    s.append(strip);
+  }
+
+  if((a.tags||[]).length){
+    const tc = el("div","tagchips");
+    a.tags.forEach(t=>{
+      const sp=el("span",null,t);
+      sp.onclick=()=>{ FILTER=t; closeSheet(); renderTagbar(); render(); };
+      tc.append(sp);
+    });
+    s.append(tc);
+  }
+
+  if(a.memo) s.append(el("div","memo",a.memo));
+
+  const copy = el("button","btn wide","태그 복사");
+  copy.style.marginBottom="9px";
+  copy.onclick = async ()=>{
+    const t = a.name.startsWith("artist:") ? a.name : "artist:"+a.name;
+    try{ await navigator.clipboard.writeText(t); toast("복사됨: "+t); }
+    catch(e){ toast("복사할 수 없어요"); }
+  };
+  s.append(copy);
+
+  if(canWrite()){
+    const g = el("div","row2");
+    g.style.marginBottom="9px";
+    const add = el("button","btn primary","이미지 추가");
+    add.onclick = ()=>pickImages(a);
+    const edit = el("button","btn","정보 수정");
+    edit.onclick = ()=>openForm(a);
+    g.append(add,edit);
+    s.append(g);
+  }else{
+    const n=el("div","statusnote");
+    n.textContent="보기 전용입니다. 추가하거나 고치려면 설정에서 깃허브 토큰을 넣으세요.";
+    s.append(n);
+  }
+
+  openSheet();
+}
+
+/* 추가·수정 폼 */
+function openForm(a){
+  const isNew = !a;
+  const s = $("#sheet");
+  s.innerHTML="";
+  s.append(el("div","grab"));
+  s.append(el("h3",null,isNew?"작가 추가":"정보 수정"));
+
+  if(!canWrite()){
+    const n=el("div","statusnote");
+    n.textContent="깃허브 토큰이 없어 저장할 수 없습니다. 설정에서 먼저 연결하세요.";
+    s.append(n);
+  }
+
+  const f1=el("div","field");
+  f1.innerHTML='<label>작가 태그</label>';
+  const inName=el("input"); inName.value=a?a.name:""; inName.placeholder="rurudo";
+  f1.append(inName);
+  f1.append(Object.assign(el("div","note"),{textContent:"NovelAI에 넣는 이름 그대로. artist: 는 빼고 적으세요."}));
+  s.append(f1);
+
+  const f2=el("div","field");
+  f2.innerHTML='<label>별칭 / 메모용 이름</label>';
+  const inAlias=el("input"); inAlias.value=a?(a.alias||""):""; inAlias.placeholder="루루도, 파스텔 수채";
+  f2.append(inAlias);
+  f2.append(Object.assign(el("div","note"),{textContent:"한글로 적어두면 나중에 한글로도 검색됩니다."}));
+  s.append(f2);
+
+  const f3=el("div","field");
+  f3.innerHTML='<label>태그</label>';
+  const inTags=el("input"); inTags.value=a?(a.tags||[]).join(", "):""; inTags.placeholder="수채, 두꺼운선, 파스텔";
+  f3.append(inTags);
+  f3.append(Object.assign(el("div","note"),{textContent:"쉼표로 구분. 위쪽 띠에서 태그로 걸러볼 수 있어요."}));
+  s.append(f3);
+
+  const f4=el("div","field");
+  f4.innerHTML='<label>메모</label>';
+  const inMemo=el("textarea"); inMemo.value=a?(a.memo||""):"";
+  inMemo.placeholder="선이 얇고 채색이 투명함. 배경은 약함.";
+  f4.append(inMemo);
+  s.append(f4);
+
+  let picked = [];
+  if(isNew){
+    const f5=el("div","field");
+    f5.innerHTML='<label>이미지</label>';
+    const pick=el("button","btn wide","갤러리에서 고르기");
+    const info=el("div","note"); info.textContent="나중에 추가해도 됩니다.";
+    pick.onclick=async()=>{
+      const files = await chooseFiles();
+      if(files.length){ picked = files; info.textContent = `${files.length}장 선택됨`; }
+    };
+    f5.append(pick, info);
+    s.append(f5);
+  }
+
+  const save=el("button","btn primary wide",isNew?"추가하기":"저장");
+  save.style.marginBottom="9px";
+  save.disabled = !canWrite();
+  save.onclick = async ()=>{
+    const name = inName.value.trim().replace(/^artist:/,"");
+    if(!name){ toast("작가 태그를 적어주세요"); return; }
+    const tags = inTags.value.split(",").map(t=>t.trim()).filter(Boolean);
+
+    save.disabled=true;
+    try{
+      if(isNew){
+        if(DATA.artists.some(x=>x.name.toLowerCase()===name.toLowerCase())){
+          toast("이미 있는 작가예요"); save.disabled=false; return;
+        }
+        const rec = {
+          id: uid(name), name, alias:inAlias.value.trim(),
+          tags, memo:inMemo.value.trim(), images:[],
+          added: new Date().toISOString()
+        };
+        DATA.artists.push(rec);
+        if(picked.length) await uploadImages(rec, picked);
+        await saveData("작가 추가: "+name);
+        toast("추가했습니다");
+      }else{
+        a.name=name; a.alias=inAlias.value.trim(); a.tags=tags; a.memo=inMemo.value.trim();
+        await saveData("작가 수정: "+name);
+        toast("저장했습니다");
+      }
+      closeSheet(); renderTagbar(); render();
+    }catch(e){
+      toast(e.message); save.disabled=false;
+    }finally{ bar(null); }
+  };
+  s.append(save);
+
+  if(!isNew && canWrite()){
+    const d=el("button","btn danger wide","작가 삭제");
+    d.onclick=async()=>{
+      if(!confirm(`${a.name} 을(를) 목록에서 지울까요? 올린 이미지 파일은 저장소에 남습니다.`)) return;
+      DATA.artists = DATA.artists.filter(x=>x.id!==a.id);
+      try{ await saveData("작가 삭제: "+a.name); closeSheet(); renderTagbar(); render(); toast("지웠습니다"); }
+      catch(e){ toast(e.message); }
+    };
+    s.append(d);
+  }
+
+  openSheet();
+  setTimeout(()=>inName.focus(),80);
+}
+
+function uid(name){
+  const base = name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "artist";
+  let id = base, n = 2;
+  while(DATA.artists.some(a=>a.id===id)) id = base+"-"+(n++);
+  return id;
+}
+
+function chooseFiles(){
+  return new Promise(res=>{
+    const inp=document.createElement("input");
+    inp.type="file"; inp.accept="image/*"; inp.multiple=true;
+    inp.onchange=()=>res([...(inp.files||[])]);
+    inp.click();
+  });
+}
+
+async function pickImages(a){
+  const files = await chooseFiles();
+  if(!files.length) return;
+  try{
+    await uploadImages(a, files);
+    await saveData("이미지 추가: "+a.name);
+    openDetail(a.id); render();
+    toast(`${files.length}장 올렸습니다`);
+  }catch(e){ toast(e.message); }
+  finally{ bar(null); }
+}
+
+async function uploadImages(a, files){
+  let i=0;
+  for(const f of files){
+    i++;
+    bar(i/files.length*90);
+    toast(`${i}/${files.length} 올리는 중…`);
+    const blob = await shrink(f);
+    const n = (a.images||[]).length + 1;
+    const path = `images/${a.id}-${Date.now().toString(36)}-${n}.jpg`;
+    await putFile(path, await b64blob(blob), `이미지: ${a.name}`);
+    (a.images = a.images||[]).push(path);
+    BLOBS.set(path, URL.createObjectURL(blob));   // 커밋이 반영되기 전까지 로컬로 보여준다
+  }
+  bar(100);
+}
+
+/* ─────────── 설정 시트 ─────────── */
+function openCfg(){
+  const s=$("#sheet");
+  s.innerHTML="";
+  s.append(el("div","grab"));
+  s.append(el("h3",null,"설정"));
+
+  const note=el("div","statusnote");
+  note.textContent = canWrite()
+    ? "깃허브에 연결되어 있습니다. 추가·수정한 내용이 저장소에 바로 커밋됩니다."
+    : "토큰을 넣으면 이 사이트에서 바로 작가와 이미지를 추가할 수 있습니다. 넣지 않으면 보기 전용입니다.";
+  s.append(note);
+
+  const mk=(label,val,ph,hint)=>{
+    const f=el("div","field");
+    f.innerHTML=`<label>${esc(label)}</label>`;
+    const i=el("input"); i.value=val||""; i.placeholder=ph||""; i.autocapitalize="off"; i.spellcheck=false;
+    f.append(i);
+    if(hint) f.append(Object.assign(el("div","note"),{textContent:hint}));
+    s.append(f);
+    return i;
+  };
+
+  const iOwner=mk("깃허브 아이디",CFG.owner,"mygithubid");
+  const iRepo =mk("저장소 이름",CFG.repo,"artist-shelf");
+  const iBr   =mk("브랜치",CFG.branch,"main");
+
+  const f=el("div","field");
+  f.innerHTML='<label>토큰</label>';
+  const iTok=el("input"); iTok.type="password"; iTok.placeholder=CFG.token?"저장됨 — 바꾸려면 새로 입력":"github_pat_...";
+  iTok.autocapitalize="off"; iTok.spellcheck=false;
+  f.append(iTok);
+  f.append(Object.assign(el("div","note"),{textContent:"Settings → Developer settings → Fine-grained tokens 에서 이 저장소에만 Contents 읽기/쓰기 권한을 준 토큰을 만드세요. 이 폰의 브라우저에만 저장됩니다."}));
+  s.append(f);
+
+  const save=el("button","btn primary wide","저장하고 확인");
+  save.style.marginBottom="9px";
+  save.onclick=async()=>{
+    CFG.owner=iOwner.value.trim();
+    CFG.repo=iRepo.value.trim();
+    CFG.branch=iBr.value.trim()||"main";
+    if(iTok.value.trim()) CFG.token=iTok.value.trim();
+    store("gs_owner",CFG.owner); store("gs_repo",CFG.repo);
+    store("gs_branch",CFG.branch); store("gs_token",CFG.token);
+
+    save.disabled=true; save.textContent="확인 중…";
+    try{
+      const r=await ghFetch("contents/data/artists.json?ref="+encodeURIComponent(CFG.branch));
+      if(r.ok){
+        toast("연결됐습니다");
+        await loadData(); renderTagbar(); render(); closeSheet();
+      }else if(r.status===404){
+        // 저장소는 있는데 목록 파일만 아직 없는 경우 — 첫 저장 때 만들어진다
+        const rr = await ghFetch("");
+        if(rr.ok){
+          SHA = null;
+          toast("연결됐습니다. 목록은 처음 추가할 때 만들어집니다");
+          renderTagbar(); render(); closeSheet();
+        }else{
+          toast("저장소를 찾을 수 없어요. 아이디와 저장소 이름을 확인하세요");
+        }
+      }else if(r.status===401){
+        toast("토큰이 거부됐습니다");
+      }else{
+        toast("확인 실패 ("+r.status+")");
+      }
+    }catch(e){ toast("네트워크 오류"); }
+    finally{ save.disabled=false; save.textContent="저장하고 확인"; updateCfgBtn(); }
+  };
+  s.append(save);
+
+  if(CFG.token){
+    const d=el("button","btn danger wide","토큰 지우기");
+    d.onclick=()=>{ CFG.token=""; del("gs_token"); toast("토큰을 지웠습니다"); closeSheet(); updateCfgBtn(); };
+    s.append(d);
+  }
+
+  openSheet();
+}
+
+function updateCfgBtn(){
+  $("#btn-cfg").classList.toggle("live", canWrite());
+}
+
+/* ─────────── 테마 ─────────── */
+function applyTheme(t){
+  if(t) document.documentElement.setAttribute("data-theme",t);
+  else document.documentElement.removeAttribute("data-theme");
+  const dark = t ? t==="dark"
+    : !window.matchMedia("(prefers-color-scheme: light)").matches;
+  const m=document.querySelector('meta[name="theme-color"]');
+  if(m) m.content = dark ? "#0E0F11" : "#FAFAF8";
+}
+$("#btn-theme").onclick=()=>{
+  const cur = store("gs_theme") || "";
+  const next = cur==="dark" ? "light" : cur==="light" ? "" : "dark";
+  if(next) store("gs_theme",next); else del("gs_theme");
+  applyTheme(next);
+  toast(next==="dark"?"어두운 화면":next==="light"?"밝은 화면":"기기 설정 따름");
+};
+
+/* ─────────── 이벤트 ─────────── */
+$("#q").addEventListener("input",()=>{
+  $("#qclear").classList.toggle("on", !!$("#q").value);
+  render();
+});
+$("#qclear").onclick=()=>{ $("#q").value=""; $("#qclear").classList.remove("on"); render(); $("#q").focus(); };
+$("#fab").onclick=()=>openForm(null);
+$("#btn-cfg").onclick=openCfg;
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){
+    if($("#lb").classList.contains("on")) $("#lb").classList.remove("on");
+    else closeSheet();
+  }
+});
+
+/* ─────────── 시작 ─────────── */
+(async function init(){
+  applyTheme(store("gs_theme")||"");
+  updateCfgBtn();
+  bar(20);
+  await loadData();
+  bar(null);
+  renderTagbar();
+  render();
+  if(!canWrite() && !CFG.token){
+    // 처음 열었을 때 한 번만 안내
+    if(!store("gs_seen")){ store("gs_seen","1"); setTimeout(()=>toast("설정에서 깃허브를 연결하면 추가할 수 있어요"),900); }
+  }
+})();
+</script>
+</body>
+</html>
